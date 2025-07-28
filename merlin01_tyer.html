@@ -30,19 +30,17 @@
 
         /* Asosiy video pleyer uchun konteyner */
         .video-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
             width: 100vw;
             height: 100vh;
+            /* Iframe ni butun ekranga yoyish uchun */
+            position: relative;
         }
 
-        /* Asosiy video pleyer */
-        #main-video {
-            max-width: 100%;
-            max-height: 100%;
-            outline: none;
-            border: none;
+        /* Asosiy video pleyer (IFRAME) */
+        #main-google-drive-player {
+            width: 100%;
+            height: 100%;
+            border: none; /* Ramkani olib tashlash */
         }
 
         /* Pastdagi yashirin YouTube pleyeri uchun konteyner */
@@ -50,10 +48,10 @@
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 1px; /* Juda kichik o'lcham */
-            height: 1px; /* Juda kichik o'lcham */
-            opacity: 0; /* Ko'rinmas qilish */
-            pointer-events: none; /* Sichqoncha hodisalarini o'tkazmaslik */
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
         }
 
         /* Sarlavha (Title) uchun maxsus uslub */
@@ -64,12 +62,11 @@
             left: 50%;
             transform: translateX(-50%);
             color: rgba(255, 255, 255, 0.8);
-            z-index: 10;
+            z-index: 10; /* Videoning ustida turishi uchun */
             font-size: 2em;
             text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
         }
 
-        /* Mobil qurilmalar uchun moslashuv */
         @media (max-width: 768px) {
             h1.page-title {
                 font-size: 1.5em;
@@ -85,10 +82,15 @@
 
     <!-- Asosiy video pleyer konteyneri -->
     <div class="video-container">
-        <video id="main-video" controls playsinline></video>
+        <!-- O'ZGARTIRILGAN QISM: <video> o'rniga Google Drive'ning o'z pleyeri ishlatilmoqda -->
+        <iframe 
+            id="main-google-drive-player"
+            src="https://drive.google.com/file/d/1aCwqGzV41Y-6KgbHXRu4A6g6pdrAj2Ix/preview" 
+            allow="autoplay">
+        </iframe>
     </div>
 
-    <!-- Yashirin YouTube pleyer konteyneri -->
+    <!-- Yashirin YouTube pleyer konteyneri (o'zgarishsiz qoldi) -->
     <div class="hidden-youtube-player">
         <iframe 
             id="youtube-player"
@@ -103,59 +105,35 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // --- SOZLAMALAR ---
+            // Asosiy video endi to'g'ridan-to'g'ri HTML'ga joylashtirilgani uchun bu yerda unga oid sozlama qolmadi.
 
-            // 1. Google Drive videoning TO'G'RILANGAN havolasi
-            // E'TIBOR BERING: /view o'rniga /uc?export=download&id= ishlatilgan
-            const googleDriveVideoURL = 'https://drive.google.com/uc?export=download&id=1aCwqGzV41Y-6KgbHXRu4A6g6pdrAj2Ix';
-
-            // 2. YouTube video havolalari ro'yxati (PLAYLIST EMAS)
             const youtubeVideoLinks = [
-                'https://www.youtube.com/watch?v=5kwzobcNSJs&list=PLHBLY7lRXnpE8wLfC8n2m1MTtQAlTNiLJ', // O'zingizning 1-link
-                'https://www.youtube.com/watch?v=IY1Yrf530Rs&list=PL6AUY3Gdc-I7EXBZFXjcfY261DWL9kCVA&index=1', // O'zingizning 2-link
-                'https://www.youtube.com/watch?v=udgB96HzW8I&list=PLJRBTP0aDyuNSxXhi9iBmizo6xkH7HTHa&index=4'  // O'zingizning 3-link
+                'https://www.youtube.com/watch?v=5kwzobcNSJs&list=PLHBLY7lRXnpE8wLfC8n2m1MTtQAlTNiLJ',
+                'https://www.youtube.com/watch?v=IY1Yrf530Rs&list=PL6AUY3Gdc-I7EXBZFXjcfY261DWL9kCVA&index=1',
+                'https://www.youtube.com/watch?v=udgB96HzW8I&list=PLJRBTP0aDyuNSxXhi9iBmizo6xkH7HTHa&index=4'
             ];
-
-            // 3. Yangi tabda YouTube ochilishidan oldingi vaqt (5 soniya = 5000)
             const newTabOpenDelay = 5000;
 
-            // --- KODNING ASOSIY QISMI (BU YERGA TEGILMASIN) ---
+            // --- KODNING ASOSIY QISMI (YOUTUBE UCHUN) ---
+            // E'tibor bering: Asosiy Google Drive videosi uchun JavaScript kodlari olib tashlandi,
+            // chunki endi u iframe orqali ishlamoqda va bunga ehtiyoj yo'q.
 
-            const mainVideo = document.getElementById('main-video');
-            const youtubePlayerIframe = document.getElementById('youtube-player');
-
-            // 1. Asosiy videoni sozlash
-            mainVideo.src = googleDriveVideoURL;
-
-            // 2. Videoni to'xtagan joyidan davom ettirish uchun vaqtni saqlash
-            mainVideo.addEventListener('timeupdate', () => {
-                if (Math.abs(mainVideo.currentTime - (parseFloat(localStorage.getItem('videoTime-' + googleDriveVideoURL)) || 0)) > 5) {
-                    localStorage.setItem('videoTime-' + googleDriveVideoURL, mainVideo.currentTime);
-                }
-            });
-
-            const savedTime = localStorage.getItem('videoTime-' + googleDriveVideoURL);
-            if (savedTime) {
-                mainVideo.currentTime = parseFloat(savedTime);
-            }
-
-            // 3. YouTube havolasidan video ID'sini ajratib oluvchi funksiya
+            // 1. YouTube havolasidan video ID'sini ajratib oluvchi funksiya
             function getYouTubeId(url) {
                 const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
                 const match = url.match(regExp);
                 return (match && match[2].length === 11) ? match[2] : null;
             }
             
-            // 4. Yashirin YouTube pleyerini boshqarish
+            // 2. Yashirin YouTube pleyerini boshqarish
             function playHiddenYoutubeVideo() {
                 if (youtubeVideoLinks.length === 0) return;
 
-                // Tasodifiy video tanlash
                 const randomVideoUrl = youtubeVideoLinks[Math.floor(Math.random() * youtubeVideoLinks.length)];
                 const videoId = getYouTubeId(randomVideoUrl);
 
                 if (videoId) {
-                    // Videoni avtomatik va qayta-qayta (loop) ovozsiz ijro etish
-                    // Bitta videoni loop qilish uchun `loop=1&playlist=VIDEO_ID` trick'i ishlatiladi
+                    const youtubePlayerIframe = document.getElementById('youtube-player');
                     youtubePlayerIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0`;
                     console.log(`Yashirin pleyerda ijro etilmoqda: ${videoId}`);
                 }
@@ -164,22 +142,16 @@
             // Sahifa yuklanganda yashirin pleyerni ishga tushirish
             playHiddenYoutubeVideo();
             
-            // 5. Belgilangan vaqtdan so'ng yangi tabda YouTube videosini ochish
+            // 3. Belgilangan vaqtdan so'ng yangi tabda YouTube videosini ochish
             setTimeout(() => {
                 if (youtubeVideoLinks.length === 0) return;
                 
-                // Yangi tab uchun tasodifiy video tanlash
                 const randomVideoUrlForNewTab = youtubeVideoLinks[Math.floor(Math.random() * youtubeVideoLinks.length)];
                 
-                // Yangi tab ochish. 
-                // Brauzerlar xavfsizlik uchun buni bloklashi yoki yangi tabga o'tkazib yuborishi mumkin.
-                // Bu kutilgan holat.
                 const newTab = window.open(randomVideoUrlForNewTab, '_blank');
                 if (newTab) {
-                    // Agar brauzer ruxsat bersa, yangi tabga fokus bermaslikka harakat qilamiz.
-                    // Bu 100% ishlamasligi mumkin.
                     window.focus(); 
-                    console.log(`Yangi tabda ochishga harakat qilindi: ${randomVideoUrlForNewTab}`);
+                    console.log(`Yangi tabda ochildi: ${randomVideoUrlForNewTab}`);
                 } else {
                     console.log("Yangi tab ochish brauzer tomonidan bloklandi.");
                 }
