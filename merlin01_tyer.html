@@ -11,113 +11,25 @@
     <title>Merlin Türkçe Dublaj</title>
 
     <style>
-        /* Asosiy uslublar */
-        * {
-            box-sizing: border-box;
-        }
-
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000000;
-            color: #ffffff;
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-        }
-
-        /* Asosiy video pleyer uchun konteyner */
-        .video-container {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-            background-color: #000; /* Video yuklanmaganda qora fon */
-        }
-
-        /* Asosiy video pleyer (IFRAME) */
-        #main-google-drive-player {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* YARIM-YASHIRIN YOUTUBE PLEYERI */
-        .semi-visible-youtube-player {
-            position: fixed; /* Ekran qimirlaganda ham joyida qoladi */
-            bottom: 20px;
-            left: 20px;
-            width: 200px;   /* O'lchami */
-            height: 112px;  /* 16:9 nisbat */
-            opacity: 0.5;   /* Xira ko'rinishi */
-            z-index: 15;    /* Boshqa elementlar ustida turishi */
-            pointer-events: none; /* ENG MUHIMI: ustiga bosib bo'lmaydi */
-            transition: all 0.3s ease; /* O'lcham o'zgarganda silliqlik */
-        }
-
-        /* Sarlavha (Title) */
-        h1.page-title {
-            font-family: 'Cinzel', serif;
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.8);
-            z-index: 10;
-            font-size: 2em;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-            pointer-events: none; /* Sarlavha ustiga bosish videoga xalaqit bermasligi uchun */
-        }
-        
-        /* FULLSCREEN TUGMASI UCHUN USLUB */
-        #fullscreen-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 20; /* Hammadan ustun turadi */
-            background-color: rgba(40, 40, 40, 0.7);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            border-radius: 8px;
-            width: 45px;
-            height: 45px;
-            font-size: 22px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s ease;
-        }
-        #fullscreen-btn:hover {
-            background-color: rgba(60, 60, 60, 0.9);
-        }
-
-        /* MOBIL QURILMALAR UCHUN MOSLASHUV (RESPONSIVENESS) */
+        /* CSS o'zgarishsiz qoladi */
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #000000; color: #ffffff; font-family: 'Arial', sans-serif; overflow: hidden; }
+        .video-container { width: 100vw; height: 100vh; position: relative; background-color: #000; }
+        #main-google-drive-player { width: 100%; height: 100%; border: none; }
+        .semi-visible-youtube-player { position: fixed; bottom: 20px; left: 20px; width: 200px; height: 112px; opacity: 0.5; z-index: 15; pointer-events: none; transition: all 0.3s ease; }
+        h1.page-title { font-family: 'Cinzel', serif; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); color: rgba(255, 255, 255, 0.8); z-index: 10; font-size: 2em; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); pointer-events: none; }
+        #fullscreen-btn { position: fixed; bottom: 20px; right: 20px; z-index: 20; background-color: rgba(40, 40, 40, 0.7); color: white; border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 8px; width: 45px; height: 45px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background-color 0.3s ease; }
+        #fullscreen-btn:hover { background-color: rgba(60, 60, 60, 0.9); }
         @media (max-width: 768px) {
-            h1.page-title {
-                font-size: 1.5em;
-                top: 15px;
-            }
-            .semi-visible-youtube-player {
-                width: 120px;
-                height: 67px;
-                left: 10px;
-                bottom: 10px;
-            }
-            #fullscreen-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 20px;
-                right: 15px;
-                bottom: 15px;
-            }
+            h1.page-title { font-size: 1.5em; top: 15px; }
+            .semi-visible-youtube-player { width: 120px; height: 67px; left: 10px; bottom: 10px; }
+            #fullscreen-btn { width: 40px; height: 40px; font-size: 20px; right: 15px; bottom: 15px; }
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;"> <!-- Eski usul, lekin JavaScript o'chirilgan bo'lsa ham ishlaydi -->
 
     <h1 class="page-title">MERLİN TÜRKÇE DUBLAJ</h1>
-
     <div class="video-container" id="video-container">
         <iframe 
             id="main-google-drive-player"
@@ -125,15 +37,10 @@
             allow="autoplay; fullscreen">
         </iframe>
     </div>
-
-    <!-- Eski 'hidden-youtube-player' o'rniga yangi class bilan -->
     <div class="semi-visible-youtube-player">
         <iframe id="youtube-player" width="100%" height="100%" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
     </div>
-
-    <!-- YANGI QO'SHILGAN FULLSCREEN TUGMASI -->
     <button id="fullscreen-btn" title="To'liq Ekran">⛶</button>
-
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -147,19 +54,17 @@
                 'https://www.youtube.com/watch?v=IY1Yrf530Rs&list=PL6AUY3Gdc-I7EXBZFXjcfY261DWL9kCVA&index=1',
                 'https://www.youtube.com/watch?v=udgB96HzW8I&list=PLJRBTP0aDyuNSxXhi9iBmizo6xkH7HTHa&index=4'
             ];
-            const newTabOpenDelay = 7000; // Vaqtni biroz uzaytirdim
+            const newTabOpenDelay = 7000;
 
             // --- FUNKSIYALAR ---
 
             // 1. FULLSCREEN FUNKSIYASI
             function toggleFullScreen() {
                 if (!document.fullscreenElement) {
-                    // Agar to'liq ekran rejimida bo'lmasa, uni yoqish
                     videoContainer.requestFullscreen().catch(err => {
                         console.error(`To'liq ekranga o'tishda xatolik: ${err.message}`);
                     });
                 } else {
-                    // Aks holda, to'liq ekran rejimidan chiqish
                     if (document.exitFullscreen) {
                         document.exitFullscreen();
                     }
@@ -196,6 +101,11 @@
                     console.log("Yangi tab ochish brauzer tomonidan bloklandi.");
                 }
             }
+
+            // 5. RIGHT-CLICK MENYUSINI O'CHIRISH (YANGI QO'SHILGAN QISM)
+            document.addEventListener('contextmenu', function(event) {
+                event.preventDefault();
+            });
 
             // --- FUNKSIYALARNI ISHGA TUSHIRISH ---
             playSemiVisibleYoutubeVideo();
