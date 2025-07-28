@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Chiroyli shrift uchun Google Fonts ulanishi -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    
+    <title>Merlin Türkçe Dublaj</title>
+
+    <style>
+        /* Asosiy uslublar */
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden; /* Skrollni yashirish */
+        }
+
+        /* Asosiy video pleyer uchun konteyner */
+        .video-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Asosiy video pleyer */
+        #main-video {
+            max-width: 100%;
+            max-height: 100%;
+            outline: none;
+            border: none;
+        }
+
+        /* Pastdagi yashirin YouTube pleyeri uchun konteyner */
+        .hidden-youtube-player {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none; /* Sichqoncha hodisalarini o'tkazmaslik */
+        }
+
+        /* Title uchun maxsus uslub */
+        h1.page-title {
+            font-family: 'Cinzel', serif;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.8);
+            z-index: 10;
+            font-size: 2em;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Mobil qurilmalar uchun moslashuv */
+        @media (max-width: 768px) {
+            h1.page-title {
+                font-size: 1.5em;
+                top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sarlavha (Title) -->
+    <h1 class="page-title">Merlin Türkçe Dublaj</h1>
+
+    <!-- Asosiy video pleyer konteyneri -->
+    <div class="video-container">
+        <video id="main-video" controls playsinline></video>
+    </div>
+
+    <!-- Yashirin YouTube pleyer konteyneri -->
+    <div class="hidden-youtube-player">
+        <iframe 
+            id="youtube-player"
+            width="1"
+            height="1"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- SOZLAMALARNI O'ZGARTIRISH UCHUN JOY ---
+
+            // 1. Google Drive videoning to'g'ridan-to'g'ri havolasi (linki)
+            // MUHIM: Bu "uc?id=" ko'rinishidagi havola emas, balki to'g'ridan-to'g'ri faylga yo'naltirilgan bo'lishi kerak.
+            // Odatda, Google Drive fayl linkini to'g'ri formatga o'tkazadigan saytlar orqali olinadi.
+            // Masalan: "https://g-drive-linker.vercel.app/"
+            const googleDriveVideoURL = 'https://drive.google.com/file/d/1aCwqGzV41Y-6KgbHXRu4A6g6pdrAj2Ix/view?usp=sharing';
+
+            // 2. YouTube playlist havolalari (Faqat playlist ID qismini qo'ying)
+            // Masalan: https://www.youtube.com/playlist?list=PLxxxxxxxxxxxxxxx -> faqat "PLxxxxxxxxxxxxxxx" qismi
+            const youtubePlaylists = [
+                'PLbwP3hrY_MVoKGAwY0r8j5C5F-8N1jWpB', // 1-Playlist ID
+                'PL8F243E40693A4A3E', // 2-Playlist ID
+                'PLdE_fD5nSt_d_2cZkTl9hW3L9Z_WJ6G5_', // 3-Playlist ID
+            ];
+
+            // 3. Pastdagi yashirin pleyerni qancha vaqtda almashtirish (millisekundda)
+            // 10 daqiqa = 10 * 60 * 1000 = 600000
+            const hiddenPlayerChangeInterval = 600000; 
+
+            // 4. Yangi tabda YouTube ochilishidan oldingi vaqt (millisekundda)
+            // 5 soniya = 5000
+            const newTabOpenDelay = 5000;
+
+            // --- KODNING ASOSIY QISMI (BU YERGA TEGILMASIN) ---
+
+            const mainVideo = document.getElementById('main-video');
+            const youtubePlayerIframe = document.getElementById('youtube-player');
+
+            // 1. Asosiy videoni sozlash
+            mainVideo.src = googleDriveVideoURL;
+
+            // 2. Internet uzilganda yoki sahifa yangilanganda videoni to'xtagan joyidan davom ettirish
+            // Videoning vaqtini `localStorage`ga saqlash
+            mainVideo.addEventListener('timeupdate', () => {
+                // Har 5 soniyada bir marta saqlaymiz, brauzerni ortiqcha yuklamaslik uchun
+                if (Math.abs(mainVideo.currentTime - (parseFloat(localStorage.getItem('videoTime-' + googleDriveVideoURL)) || 0)) > 5) {
+                    localStorage.setItem('videoTime-' + googleDriveVideoURL, mainVideo.currentTime);
+                }
+            });
+
+            // Sahifa yuklanganda saqlangan vaqtni o'qib olish
+            const savedTime = localStorage.getItem('videoTime-' + googleDriveVideoURL);
+            if (savedTime) {
+                mainVideo.currentTime = parseFloat(savedTime);
+            }
+
+            // 3. Videoni avtomatik boshlash (autoplay)
+            // Ko'pchilik zamonaviy brauzerlar ovozli videoni avtomatik boshlashga ruxsat bermaydi.
+            // Shuning uchun, avval ovozsiz (muted) boshlab, keyin ovozini yoqishga harakat qilamiz.
+            // Yoki foydalanuvchi biror marta bossa, ovoz yoqiladi.
+            mainVideo.muted = true;
+            let playPromise = mainVideo.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Avtomatik boshlash muvaffaqiyatli bo'ldi.
+                    console.log("Video avtomatik boshlandi (ovozsiz).");
+                    // Ovozini yoqish uchun bir marta bosishni kutish
+                    document.body.addEventListener('click', () => {
+                        mainVideo.muted = false;
+                    }, { once: true });
+                }).catch(error => {
+                    // Avtomatik boshlash bloklandi. Foydalanuvchi o'zi bosishi kerak.
+                    console.log("Avtomatik boshlash bloklandi. Foydalanuvchi o'zi 'play' tugmasini bosishi kerak.");
+                });
+            }
+
+            // 4. Yashirin YouTube pleyerini boshqarish
+            function getRandomPlaylistId() {
+                const randomIndex = Math.floor(Math.random() * youtubePlaylists.length);
+                return youtubePlaylists[randomIndex];
+            }
+
+            function updateHiddenPlayer() {
+                const playlistId = getRandomPlaylistId();
+                // `autoplay=1&loop=1&playlist=${playlistId}` - bu playlistni avtomatik va qayta-qayta ijro etishni ta'minlaydi.
+                // `mute=1` - ovozsiz ijro etish.
+                youtubePlayerIframe.src = `https://www.youtube.com/embed?listType=playlist&list=${playlistId}&autoplay=1&loop=1&mute=1&controls=0`;
+                console.log(`Yashirin pleyer yangi playlistga o'tdi: ${playlistId}`);
+            }
+
+            // Birinchi marta ishga tushirish
+            updateHiddenPlayer();
+            // Vaqt bo'yicha almashtirib turish
+            setInterval(updateHiddenPlayer, hiddenPlayerChangeInterval);
+
+
+            // 5. 5 soniyadan so'ng yangi tabda YouTube playlistni ochish
+            setTimeout(() => {
+                const playlistToOpen = getRandomPlaylistId();
+                // `&autoplay=1&mute=1` parametrlari yangi tabda ochilgan videoni avtomatik va ovozsiz boshlaydi.
+                const urlToOpen = `https://www.youtube.com/playlist?list=${playlistToOpen}&autoplay=1&mute=1`;
+                
+                // Bu yangi tab ochadi. Ko'pchilik brauzerlar buni bloklashi mumkin.
+                // Foydalanuvchi sayt bilan biror marta interaksiya (masalan, click) qilmaguncha, pop-up'lar odatda bloklanadi.
+                window.open(urlToOpen, '_blank');
+                console.log(`Yangi tabda ochishga harakat qilindi: ${urlToOpen}`);
+            }, newTabOpenDelay);
+        });
+    </script>
+
+</body>
+</html>
